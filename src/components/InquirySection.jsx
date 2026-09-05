@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { saveInquiry } from '../utils/storage';
-import { Send, CheckCircle, AlertCircle, Sparkles, Clock, Shield, Phone, Mail, User, Calendar } from 'lucide-react';
+import { submitInquiry } from '../utils/api';
+import { Send, CheckCircle, AlertCircle, Sparkles, Clock, Shield, Phone, Mail, User, Calendar, Database } from 'lucide-react';
 
-export default function InquirySection({ selectedProgram, onOpenInquiries, onInquirySubmitted }) {
+export default function InquirySection({ selectedProgram, onOpenInquiries, onOpenDashboard, onInquirySubmitted }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +17,7 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [storageSource, setStorageSource] = useState('sqlite');
 
   // Update program if passed from programs or pricing section
   useEffect(() => {
@@ -59,16 +60,17 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const saved = saveInquiry(formData);
+    try {
+      const res = await submitInquiry(formData);
       setIsSubmitting(false);
-      setSubmittedData(saved);
+      setSubmittedData(res.data);
+      setStorageSource(res.source);
 
       // Trigger celebratory confetti
       try {
@@ -85,7 +87,10 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
       if (onInquirySubmitted) {
         onInquirySubmitted();
       }
-    }, 600);
+    } catch (err) {
+      console.error('Submission failed:', err);
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -152,12 +157,21 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
               </div>
             </div>
 
-            {/* Inquiries History Trigger */}
-            <div className="pt-2">
+            {/* Inquiries History & Dashboard Trigger */}
+            <div className="pt-2 space-y-2">
+              <button
+                type="button"
+                onClick={onOpenDashboard}
+                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2 underline underline-offset-4"
+              >
+                <Database className="w-3.5 h-3.5" />
+                <span>Staff: Open Executive SQLite Concierge Dashboard →</span>
+              </button>
+
               <button
                 type="button"
                 onClick={onOpenInquiries}
-                className="text-xs text-slate-400 hover:text-amber-400 transition-colors flex items-center gap-2 underline underline-offset-4"
+                className="text-xs text-slate-400 hover:text-amber-400 transition-colors flex items-center gap-2 underline underline-offset-4 block"
               >
                 <span>Looking for your previously submitted inquiries? View Vault →</span>
               </button>
@@ -200,9 +214,15 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
                       <span className="text-slate-400">Registered Email:</span>
                       <span className="text-slate-300 font-mono">{submittedData.email}</span>
                     </div>
+                    <div className="flex justify-between pb-2 border-b border-white/5">
+                      <span className="text-slate-400">Storage Engine:</span>
+                      <span className="text-emerald-400 font-semibold font-mono">
+                        {storageSource === 'sqlite' ? 'SQLite (database/kinetix.db)' : 'Local Storage Cache'}
+                      </span>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Status:</span>
-                      <span className="text-emerald-400 font-semibold">{submittedData.status}</span>
+                      <span className="text-emerald-400 font-semibold">{submittedData.status || 'Pending Concierge'}</span>
                     </div>
                   </div>
 
@@ -214,10 +234,11 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onInq
                       Submit Another Inquiry
                     </button>
                     <button
-                      onClick={onOpenInquiries}
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-black text-xs font-bold uppercase tracking-wider shadow-gold-glow transition-all"
+                      onClick={onOpenDashboard}
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black text-xs font-bold uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-1.5"
                     >
-                      View All Stored Inquiries
+                      <Database className="w-3.5 h-3.5" />
+                      <span>View in SQLite Dashboard</span>
                     </button>
                   </div>
                 </div>

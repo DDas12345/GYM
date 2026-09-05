@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Sparkles, Menu, X, Inbox, ArrowUpRight, PhoneCall } from 'lucide-react';
+import { Shield, Sparkles, Menu, X, Inbox, ArrowUpRight, PhoneCall, Database } from 'lucide-react';
 
-export default function Navbar({ onOpenInquiries, inquiryCount = 0 }) {
+export default function Navbar({ onOpenInquiries, onOpenDashboard, inquiryCount = 0 }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -83,6 +83,17 @@ export default function Navbar({ onOpenInquiries, inquiryCount = 0 }) {
 
           {/* Right Action CTAs */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Concierge Dashboard Button */}
+            <button
+              onClick={onOpenDashboard}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-xs font-semibold text-emerald-300 hover:text-emerald-200 transition-all group"
+              title="Open Executive Concierge Dashboard (SQLite Data)"
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-400 group-hover:rotate-12 transition-transform" />
+              <span>Dashboard</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            </button>
+
             {/* Inquiry History Badge Button */}
             <button
               onClick={onOpenInquiries}
@@ -149,6 +160,17 @@ export default function Navbar({ onOpenInquiries, inquiryCount = 0 }) {
           </div>
 
           <div className="flex flex-col gap-3 pt-2">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenDashboard();
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-xs font-semibold text-emerald-300"
+            >
+              <Database className="w-4 h-4 text-emerald-400" />
+              <span>Concierge Dashboard (SQLite)</span>
+            </button>
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

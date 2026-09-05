@@ -96,50 +96,56 @@ Per the project requirements, the inquiry form is **100% functional on the front
 
 ---
 
-## ❓ Backend Status: Has a Backend Been Added?
+## 🗄️ Backend & Database Architecture: Local SQLite Integration
 
-### **Short Answer**: Only the frontend is completed (by design).
+### **Current Status**: Full-Stack with Local SQLite Database & Executive Dashboard
 
-### Detailed Explanation:
-In strict accordance with the project prompt guidelines:
-> *"Store submissions in frontend state/local storage for now — no backend or database integration needed"*
+As part of the backend expansion, I integrated a **persistent local SQLite database** and an **Executive Concierge Dashboard**:
 
-- **What is currently implemented**:
-  - Full frontend data handling, input sanitization, form validation, and reactive UI feedback.
-  - Browser-level persistence using the HTML5 `localStorage` Web API. Submissions survive page reloads and browser restarts.
-- **What a future Phase 2 Backend would look like**:
-  If I were to expand this into a complete production full-stack deployment, I would build:
-  1. **REST / GraphQL API**: A Node.js + Express or Next.js Serverless route (`/api/inquiries`).
-  2. **Database Layer**: PostgreSQL or MongoDB (via Prisma ORM) to store inquiries, member profiles, and booking schedules.
-  3. **Transactional Email**: Integration with Resend or SendGrid to send automatic confirmation emails with calendar `.ics` invites for booked tours.
-  4. **Authentication**: JWT or Clerk / NextAuth for a private member portal.
+- **Database Engine**: Powered by Node.js's native `node:sqlite` (`DatabaseSync`), storing all records in a persistent binary file at `database/kinetix.db`. Zero native C++ compilation issues on macOS or Apple Silicon.
+- **REST API Layer (`server/server.js`)**: Express.js server running on port `5001` (automatically proxied via Vite from `http://localhost:3000/api` to `http://localhost:5001/api`).
+- **Endpoints Available**:
+  - `GET /api/inquiries`: Query inquiries with optional status/search filters.
+  - `POST /api/inquiries`: Validate and insert new VIP inquiries directly into SQLite.
+  - `PATCH /api/inquiries/:id`: Update status (`Pending Concierge`, `Contacted`, `VIP Tour Scheduled`, `Enrolled`, `Archived`) and internal staff notes.
+  - `DELETE /api/inquiries/:id`: Permanently delete inquiries from the database.
+  - `GET /api/stats`: Real-time KPI aggregation (total count, conversion rate, discipline breakdown).
+  - `GET /api/health`: Health status check verifying database connection.
+- **Executive Concierge Dashboard (`src/components/Dashboard.jsx`)**:
+  - Accessible via the **"Dashboard"** button in the header or `#dashboard` URL hash.
+  - Real-time KPI metrics cards with live enrollment rates.
+  - Status management dropdowns for each applicant.
+  - Internal staff notes editor with instant save to SQLite.
+  - 1-click **Export to CSV** feature for reporting.
+  - Mock inquiry generator to simulate new intake submissions.
+  - Offline fallback: If the backend is disconnected, it gracefully falls back to `localStorage` with a clear status indicator.
 
 ---
 
 ## 💻 Local Setup & Development Instructions
 
 ### Prerequisites
-- Node.js (v18.0.0 or higher recommended)
+- Node.js (v22.5.0 or higher recommended for native `node:sqlite`)
 - npm (v9.0.0 or higher)
 
-### Steps to Run
-1. Clone or navigate to the project directory:
+### Steps to Run Full-Stack (Frontend + SQLite Backend)
+1. Navigate to the project directory:
    ```bash
-   cd /path/to/GYM
+   cd /Users/debanshikadas/Desktop/Projects/GYM
    ```
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the Vite development server:
+3. Start both the Express SQLite backend and the Vite frontend:
    ```bash
-   npm run dev
+   npm run dev:all
    ```
+   *(Or start them individually: `npm run server` for port 5001, and `npm run dev` for port 3000)*
 4. Open your browser and navigate to:
-   ```
-   http://localhost:3000
-   ```
-5. To test building for production:
+   - **Public Luxury Website**: [http://localhost:3000](http://localhost:3000)
+   - **Concierge SQLite Dashboard**: [http://localhost:3000/#dashboard](http://localhost:3000/#dashboard)
+5. To build for production:
    ```bash
    npm run build
    ```

@@ -12,33 +12,75 @@ import FitnessCalculator from './components/FitnessCalculator';
 import InquirySection from './components/InquirySection';
 import InquiriesModal from './components/InquiriesModal';
 import VideoModal from './components/VideoModal';
+import Dashboard from './components/Dashboard';
 import Footer from './components/Footer';
-import { getInquiries } from './utils/storage';
+import { fetchStats } from './utils/api';
 
 export default function App() {
+  const [viewMode, setViewMode] = useState('site'); // 'site' | 'dashboard'
   const [selectedProgram, setSelectedProgram] = useState('');
   const [isInquiriesOpen, setIsInquiriesOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [inquiryCount, setInquiryCount] = useState(0);
 
-  const refreshInquiryCount = () => {
-    const list = getInquiries();
-    setInquiryCount(list.length);
+  const refreshInquiryCount = async () => {
+    try {
+      const res = await fetchStats();
+      if (res?.data?.total !== undefined) {
+        setInquiryCount(res.data.total);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
     refreshInquiryCount();
+
+    // Check hash on load for deep linking to #dashboard
+    if (window.location.hash === '#dashboard') {
+      setViewMode('dashboard');
+    }
+
+    const handleHashChange = () => {
+      if (window.location.hash === '#dashboard') {
+        setViewMode('dashboard');
+      } else if (window.location.hash === '#site' || !window.location.hash) {
+        setViewMode('site');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const handleProgramSelect = (progTitle) => {
     setSelectedProgram(progTitle);
   };
 
+  const openDashboard = () => {
+    setViewMode('dashboard');
+    window.location.hash = 'dashboard';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const backToSite = () => {
+    setViewMode('site');
+    window.location.hash = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // If in Dashboard View, render the Executive Concierge Dashboard
+  if (viewMode === 'dashboard') {
+    return <Dashboard onBackToSite={backToSite} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#07080B] text-slate-100 selection:bg-amber-500 selection:text-black font-sans">
       {/* Sticky Navigation */}
       <Navbar
         onOpenInquiries={() => setIsInquiriesOpen(true)}
+        onOpenDashboard={openDashboard}
         inquiryCount={inquiryCount}
       />
 
@@ -71,10 +113,11 @@ export default function App() {
         {/* 9. Interactive Biometric & Metabolic Calculator */}
         <FitnessCalculator onApplyRecommendation={handleProgramSelect} />
 
-        {/* 10. Inquiry & Tour Booking Section (Frontend Only) */}
+        {/* 10. Inquiry & Tour Booking Section (Connected to SQLite) */}
         <InquirySection
           selectedProgram={selectedProgram}
           onOpenInquiries={() => setIsInquiriesOpen(true)}
+          onOpenDashboard={openDashboard}
           onInquirySubmitted={refreshInquiryCount}
         />
       </main>
