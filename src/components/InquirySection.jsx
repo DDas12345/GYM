@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { submitInquiry } from '../utils/api';
-import { Send, CheckCircle, AlertCircle, Sparkles, Clock, Shield, Phone, Mail, User, Calendar, Database } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, Sparkles, Clock, Shield, Phone, Mail, User, Calendar } from 'lucide-react';
 
-export default function InquirySection({ selectedProgram, onOpenInquiries, onOpenDashboard, onInquirySubmitted }) {
+export default function InquirySection({ selectedProgram, onOpenInquiries, onInquirySubmitted }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -157,17 +157,8 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onOpe
               </div>
             </div>
 
-            {/* Inquiries History & Dashboard Trigger */}
+            {/* Inquiries History Trigger */}
             <div className="pt-2 space-y-2">
-              <button
-                type="button"
-                onClick={onOpenDashboard}
-                className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-2 underline underline-offset-4"
-              >
-                <Database className="w-3.5 h-3.5" />
-                <span>Staff: Open Executive SQLite Concierge Dashboard →</span>
-              </button>
-
               <button
                 type="button"
                 onClick={onOpenInquiries}
@@ -214,12 +205,7 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onOpe
                       <span className="text-slate-400">Registered Email:</span>
                       <span className="text-slate-300 font-mono">{submittedData.email}</span>
                     </div>
-                    <div className="flex justify-between pb-2 border-b border-white/5">
-                      <span className="text-slate-400">Storage Engine:</span>
-                      <span className="text-emerald-400 font-semibold font-mono">
-                        {storageSource === 'sqlite' ? 'SQLite (database/kinetix.db)' : 'Local Storage Cache'}
-                      </span>
-                    </div>
+
                     <div className="flex justify-between">
                       <span className="text-slate-400">Status:</span>
                       <span className="text-emerald-400 font-semibold">{submittedData.status || 'Pending Concierge'}</span>
@@ -232,13 +218,6 @@ export default function InquirySection({ selectedProgram, onOpenInquiries, onOpe
                       className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold uppercase tracking-wider transition-all"
                     >
                       Submit Another Inquiry
-                    </button>
-                    <button
-                      onClick={onOpenDashboard}
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black text-xs font-bold uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-1.5"
-                    >
-                      <Database className="w-3.5 h-3.5" />
-                      <span>View in SQLite Dashboard</span>
                     </button>
                   </div>
                 </div>

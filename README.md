@@ -57,9 +57,8 @@ I've set up the project so it's very easy to run locally.
 ## 📂 Project Structure Highlights
 
 - `/src`: Contains the React frontend (Components, App routing, Three.js canvases).
-  - `/src/components/Dashboard.jsx`: The concierge dashboard for staff.
   - `/src/utils/api.js`: The API client for handling data storage in localStorage.
 
 ## 🎓 Reflection
 
-Building this project taught me a lot about seamlessly bridging cutting-edge frontend libraries like Three.js with robust React architectures. Designing the Executive Dashboard and building the immersive 3D experience was incredibly rewarding. I'm excited about how it turned out!
+Building this project taught me a lot about seamlessly bridging cutting-edge frontend libraries like Three.js with robust React architectures. Building the immersive 3D experience was incredibly rewarding. I'm excited about how it turned out!
