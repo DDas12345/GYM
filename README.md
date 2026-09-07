@@ -1,6 +1,9 @@
 # KINETIX Athletic Club
 
-Welcome to the **KINETIX Athletic Club** project repository! I built this as a comprehensive, full-stack web development project. My goal was to design and develop a premium, visually stunning gym website from scratch, complete with immersive 3D elements and a robust backend to handle member inquiries.
+🌍 **Live Demo:** [View Live Site](https://6a9e51225056d3c0066b87e4--eloquent-zuccutto-7f550a.netlify.app/)
+💻 **GitHub Repository:** [https://github.com/DDas12345/GYM.git](https://github.com/DDas12345/GYM.git)
+
+Welcome to the **KINETIX Athletic Club** project repository! I built this as a comprehensive, frontend web development project. My goal was to design and develop a premium, visually stunning gym website from scratch, complete with immersive 3D elements and interactive UI components.
 
 ## 🚀 Project Overview
 
@@ -38,7 +41,7 @@ I've set up the project so it's very easy to run locally.
 
 1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/DDas12345/GYM.git
    cd GYM
    ```
 
