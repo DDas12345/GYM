@@ -1,43 +1,16 @@
 import { getInquiries, saveInquiry, deleteInquiry } from './storage';
 
-const API_BASE = '/api';
-
 /**
- * Check if the SQLite backend server is reachable
+ * Check if backend is reachable (Mocked to true since we use localStorage)
  */
 export const checkBackendHealth = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
-    if (!res.ok) return { online: false };
-    const data = await res.json();
-    return { online: true, database: data.database, databaseFile: data.databaseFile };
-  } catch (err) {
-    return { online: false, error: err.message };
-  }
+  return { online: true, source: 'local_storage' };
 };
 
 /**
  * Fetch all inquiries with optional status/search filters
  */
 export const fetchInquiries = async ({ status = 'All', search = '' } = {}) => {
-  try {
-    const params = new URLSearchParams();
-    if (status && status !== 'All') params.append('status', status);
-    if (search) params.append('search', search);
-
-    const res = await fetch(`${API_BASE}/inquiries?${params.toString()}`, {
-      signal: AbortSignal.timeout(3000),
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-      return { source: 'sqlite', data: json.data };
-    }
-  } catch (err) {
-    console.warn('[API] SQLite backend unreachable, falling back to local storage:', err);
-  }
-
-  // Fallback to localStorage
   const localList = getInquiries();
   const filtered = localList.filter((item) => {
     const matchesStatus = status === 'All' || item.status === status;
@@ -54,53 +27,17 @@ export const fetchInquiries = async ({ status = 'All', search = '' } = {}) => {
 };
 
 /**
- * Submit a new inquiry to SQLite (with localStorage backup)
+ * Submit a new inquiry
  */
 export const submitInquiry = async (formData) => {
-  try {
-    const res = await fetch(`${API_BASE}/inquiries`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-      signal: AbortSignal.timeout(3000),
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-      // Keep local storage synchronized
-      saveInquiry(json.data);
-      return { source: 'sqlite', data: json.data };
-    }
-  } catch (err) {
-    console.warn('[API] SQLite insert failed, saving to localStorage:', err);
-  }
-
-  // Fallback
   const localSaved = saveInquiry(formData);
   return { source: 'local_storage', data: localSaved };
 };
 
 /**
- * Update inquiry status & internal notes in SQLite
+ * Update inquiry status & internal notes
  */
 export const updateInquiryStatus = async (id, { status, notes }) => {
-  try {
-    const res = await fetch(`${API_BASE}/inquiries/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, notes }),
-      signal: AbortSignal.timeout(3000),
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-      return { source: 'sqlite', data: json.data };
-    }
-  } catch (err) {
-    console.warn('[API] SQLite update failed:', err);
-  }
-
-  // Update in localStorage
   try {
     const raw = localStorage.getItem('kinetix_inquiries_data');
     if (raw) {
@@ -126,41 +63,17 @@ export const updateInquiryStatus = async (id, { status, notes }) => {
 };
 
 /**
- * Delete an inquiry from SQLite
+ * Delete an inquiry
  */
 export const deleteInquiryApi = async (id) => {
-  try {
-    const res = await fetch(`${API_BASE}/inquiries/${id}`, {
-      method: 'DELETE',
-      signal: AbortSignal.timeout(3000),
-    });
-
-    if (res.ok) {
-      deleteInquiry(id);
-      return { success: true, source: 'sqlite' };
-    }
-  } catch (err) {
-    console.warn('[API] SQLite delete failed, deleting locally:', err);
-  }
-
   deleteInquiry(id);
   return { success: true, source: 'local_storage' };
 };
 
 /**
- * Fetch stats from SQLite or calculate from localStorage
+ * Fetch stats
  */
 export const fetchStats = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/stats`, { signal: AbortSignal.timeout(2000) });
-    if (res.ok) {
-      const json = await res.json();
-      return { source: 'sqlite', data: json.data };
-    }
-  } catch (err) {
-    console.warn('[API] SQLite stats failed, aggregating locally:', err);
-  }
-
   const list = getInquiries();
   const total = list.length;
   const pending = list.filter((i) => i.status === 'Pending Concierge' || !i.status).length;
